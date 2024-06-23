@@ -5,6 +5,8 @@ import datetime
 from colorama import Fore, Style
 
 from pathlib import Path
+
+from fastspider.config import config
 from fastspider.utils._singleton import Singleton
 from logging.handlers import TimedRotatingFileHandler
 
@@ -49,7 +51,7 @@ class LogManager(metaclass=Singleton):
         if log_path:
             self.log_dir = Path(log_path)
             self.ensure_log_dir_exists(self.log_dir)
-            log_file_name = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S.logger")
+            log_file_name = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S.log")
             log_file = self.log_dir.joinpath(log_file_name)
             fh = TimedRotatingFileHandler(
                 log_file, when="midnight", interval=1, backupCount=99, encoding="utf-8"
@@ -110,4 +112,10 @@ def log_setup(log_to_console=True, level=logging.INFO):
     return logger
 
 
-logger = log_setup()
+if config.get_config('logger'):
+    logger_cfg = config.get_config('logger')
+    level = logger_cfg['level'].upper()
+    log_to_console = logger_cfg['console']
+    logger = log_setup(log_to_console=log_to_console, level=level)
+else:
+    logger = log_setup()

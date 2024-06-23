@@ -1,3 +1,28 @@
+temp:
+  enable: true
+  save_path: 'C:\Users\qunyin\Desktop\Project\temp'
+
+downloader:
+  enable: true
+  ssl: false
+  retries: 1
+  limit: 1000
+  limit_per_host: 250
+  thread_num: 100
+  save_path: 'C:\Users\qunyin\Desktop\Project\download'
+
+
+
 logger:
-  level: 'debug'
+  level: 'DEBUG'
   console: true
+
+mongodb:
+  uri: 'mongodb://localhost:27017/lkkings'
+  database: 'lkkings'
+
+redis:
+  host: 'localhost'
+  port: 6379
+  db: 0
+  password:

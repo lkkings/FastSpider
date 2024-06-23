@@ -11,7 +11,7 @@ Change Log  :
 
 """
 from http.cookies import SimpleCookie
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Tuple
 
 from aiohttp import ClientResponse
 from yarl import URL
@@ -21,9 +21,14 @@ from fastspider.utils._trackref import object_ref
 
 class Response(object_ref):
     _response: ClientResponse = None
+    from_todo: Union[str, Tuple]
 
     def __init__(self, response: ClientResponse, **kwargs):
         self._response = response
+
+    @property
+    def r(self):
+        return self._response
 
     @property
     def url(self) -> URL:
@@ -33,6 +38,10 @@ class Response(object_ref):
     def status(self) -> int:
         return self._response.status
 
+    @property
+    def content(self):
+        return self._response.content
+
     def cookies(self) -> SimpleCookie[str]:
         return self._response.cookies
 
@@ -41,6 +50,9 @@ class Response(object_ref):
 
     async def text(self):
         return await self._response.text()
+
+    def close(self):
+        self._response.close()
 
     async def json(self):
         return await self._response.json()

@@ -15,17 +15,21 @@ from typing import AsyncGenerator, List, Union
 from yarl import URL
 
 from fastspider import Crawler, CrawlerTask, Response, Item, Request
-from fastspider.logger import logger
 
 crawler = Crawler(name='百度爬虫')
+crawler.init(thread_num=100, max_core_num=1000)
 
 
-@crawler.init(thread_num=100, max_core_num=1000)
-@crawler.task(retries=3,priority=0)
+@crawler.item()
+class TestItem(Item):
+    pass
+
+
+@crawler.task(retries=3, priority=0)
 class BaiduCrawler(CrawlerTask):
 
     def load_urls(self, **params) -> List[Union[URL, str]]:
-        return []
+        return [""]
 
     async def request(self, **params) -> Request:
         pass
@@ -33,5 +37,5 @@ class BaiduCrawler(CrawlerTask):
     async def parse(self, response: Response, **params) -> AsyncGenerator[Item, None]:
         pass
 
-logger.error('======================')
+
 crawler.run()

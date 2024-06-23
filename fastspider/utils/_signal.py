@@ -10,6 +10,7 @@ from fastspider.utils.console_manager import RichConsoleManager
 class SignalManager(metaclass=Singleton):
     def __init__(self):
         self._shutdown_event = asyncio.Event()
+        self._handle_signal_list = []
 
     @property
     def shutdown_event(self):
@@ -20,14 +21,18 @@ class SignalManager(metaclass=Singleton):
         # 发送 SIGINT 信号给进程
         os.kill(os.getpid(), signal.SIGINT)
 
+    def register_shutdown_callback(self, callback):
+        self._handle_signal_list.append(callback)
+
     def _handle_signal(self, received_signal, frame):
         """内部处理接收到的信号"""
         self._shutdown_event.set()
         RichConsoleManager().rich_console.print("exiting ...")
         # 取消所有运行中的asyncio任务
+        for callback in self._handle_signal_list:
+            callback()
         for task in asyncio.all_tasks():
             task.cancel()
-
         # 执行资源清理操作
         sys.exit(0)
 

@@ -11,14 +11,15 @@ Change Log  :
 
 """
 from fastspider.http import Request, Response
-from fastspider.items import Field, Item
-from fastspider.crawler import Crawler,CrawlerTask
+from fastspider.items import Field, Item, UniqueItem
+from fastspider.crawler import Crawler, CrawlerTask
 
 __all__ = [
     "__version__",
     "Response",
     "Request",
     "Crawler",
+    "UniqueItem",
     "CrawlerTask",
     "Item",
     "Field",

@@ -11,12 +11,12 @@ Change Log  :
 
 """
 import asyncio
-from typing import Dict, Union, List
 
+from dataclasses import dataclass, field, asdict
+from typing import Optional, Dict, Any
 import aiohttp
 from aiohttp import ClientResponse
 from aiohttp.client_exceptions import ClientConnectorError
-from yarl import URL
 
 from fastspider.exceptions import APIBadRequestError, APIUnauthorizedError, APINotFoundError, APIUnavailableError, \
     APITimeoutError, APIConnectionError, APIError, APIRetryExhaustedError
@@ -26,31 +26,30 @@ from fastspider.utils._trackref import object_ref
 
 
 class Request(object_ref):
-    url: Union[str, URL]
-    method: str
-    headers: Dict[str, str]
-    body: Union[bytes, str]
-    cookies: Union[dict, List[dict]]
-    encoding: str
-    timeout: int
+    excluded_error_codes = []
 
     def __init__(
             self,
             url: str,
             method: str = "GET",
-            headers: Dict = None,
-            body: Union[bytes, str] = None,
-            cookies: Union[dict, List[dict]] = None,
-            encoding: str = "utf-8",
-            timeout: int = 3,
+            headers=None,
+            cookies=None,
+            proxy=None,
+            encoding: str = 'utf-8',
+
+            **kwargs: Any
     ) -> None:
+        if headers is None:
+            headers = {}
         self.method = str(method).upper()
+        self.proxy = proxy
         self.headers = headers
-        self.body = body
-        self.timeout = timeout
         self.cookies = cookies
+        self.kwargs = kwargs
         self._encoding = encoding
         self._url = url
+
+
 
     @property
     def encoding(self) -> str:
@@ -61,7 +60,7 @@ class Request(object_ref):
         return self._url
 
     def raise_for_status(self, response: ClientResponse) -> None:
-        if response.status == 200:
+        if response.status == 200 or response.status in self.excluded_error_codes:
             return
         if response.status == 400:
             raise APIBadRequestError(self)
@@ -77,9 +76,9 @@ class Request(object_ref):
             response = await client.request(method=self.method,
                                             url=self.url,
                                             headers=self.headers,
-                                            body=self.body,
-                                            timeout=self.timeout,
-                                            cookies=self.cookies)
+                                            proxy=self.proxy,
+                                            cookies=self.cookies,
+                                            **self.kwargs)
             self.raise_for_status(response)
             return Response(response=response)
         except asyncio.TimeoutError:

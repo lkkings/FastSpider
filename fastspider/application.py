@@ -23,10 +23,6 @@ class FastSpider(metaclass=Singleton):
         self.params: Dict = params
         self.__crawler_map: Dict[str, Crawler] = {}
 
-        if params.get('logger'):
-            logger_cfg = params.get('logger')
-            log_setup(level=logger_cfg['level'], log_to_console=logger_cfg['console'])
-
     def register(self, crawler: Crawler) -> None:
         __name = crawler.__name__
         if __name in self.__crawler_map:

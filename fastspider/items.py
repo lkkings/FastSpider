@@ -10,6 +10,7 @@
 Change Log  :
 
 """
+import json
 from abc import ABCMeta
 from collections.abc import MutableMapping
 from copy import deepcopy
@@ -124,3 +125,10 @@ class Item(MutableMapping, object_ref, metaclass=ItemMeta):
         """Return a :func:`~copy.deepcopy` of this item."""
         return deepcopy(self)
 
+    def json(self):
+        return json.dumps(dict(self))
+
+
+
+class UniqueItem(Item):
+    id = Field()

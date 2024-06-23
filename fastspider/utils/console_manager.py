@@ -192,6 +192,8 @@ class ProgressManager:
         self.stop()
 
 
+
+
 class RichConsoleManager(metaclass=Singleton):
     """
     主控制台管理类 (Main console management class)

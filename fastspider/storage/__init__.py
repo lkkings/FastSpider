@@ -10,4 +10,19 @@
 Change Log  :
 
 """
-import fastapi
+from typing import Dict
+
+from fastspider.storage.base_storage import BaseStorage
+from fastspider.storage.mango import MangoDB
+
+__all__ = ['MangoDB']
+
+
+def get_storage(cfg: Dict) -> BaseStorage:
+    cfg = cfg.get('storage', {}).copy()
+    storage_type = cfg.get('type')
+    del cfg['type']
+    if storage_type == 'mongodb':
+        return MangoDB(cfg)
+    else:
+        raise TypeError

@@ -10,6 +10,8 @@
 Change Log  :
 
 """
+import os.path
+
 import yaml
 import fastspider
 
@@ -18,17 +20,19 @@ from fastspider.exceptions import (
     FileNotFound,
     FilePermissionError,
 )
-from utils.common import get_resource_path
-from fastspider.logger import logger
+from fastspider.utils._singleton import Singleton
+from fastspider.utils.file_utils import get_resource_path
 
 
-class ConfigManager:
+class ConfigManager(metaclass=Singleton):
     # 如果不传入应用配置路径，则返回项目配置 (If the application conf path is not passed in, the project conf is returned)
-    def __init__(self, filepath: str = 'conf.yaml'):
-        if Path(filepath).exists():
+    def __init__(self, filepath: str = None):
+        if not filepath:
+            self.filepath = os.path.join(os.getcwd(), 'conf.yaml')
+        elif Path(filepath).exists():
             self.filepath = Path(filepath)
         else:
-            self.filepath = Path(get_resource_path(filepath))
+            self.filepath = Path(get_resource_path('default.yaml'))
         self.config = self.load_config()
 
     def load_config(self) -> dict:
@@ -61,7 +65,7 @@ class ConfigManager:
         try:
             self.filepath.write_text(yaml.dump(config), encoding="utf-8")
         except PermissionError:
-            raise FilePermissionError("配置文件路径无写权限", self.filepath)
+            raise FilePermissionError(self.filepath)
 
     def backup_config(self):
         """在进行更改前备份配置文件 (Backup the conf file before making changes)"""
@@ -97,9 +101,6 @@ class ConfigManager:
                 or {}
         )
         save_path.write_text(yaml.dump(default_config), encoding="utf-8")
-        logger.info(
-            "配置文件生成成功，保存至 {0}".format(save_path)
-        )
 
     def update_config_with_args(self, key: str, **kwargs):
         """
@@ -132,3 +133,5 @@ class TestConfigManager:
         return ConfigManager(fastspider.TEST_CONFIG_FILE_PATH).get_config(key)
 
 
+
+config = ConfigManager(filepath=_config_path)
